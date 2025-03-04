@@ -3,14 +3,7 @@ package world.bentobox.bentobox.util;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
@@ -33,22 +26,7 @@ import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Allay;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Bat;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Flying;
-import org.bukkit.entity.IronGolem;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.PufferFish;
-import org.bukkit.entity.Shulker;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Snowman;
-import org.bukkit.entity.Tameable;
-import org.bukkit.entity.WaterMob;
+import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
 import org.eclipse.jdt.annotation.NonNull;
@@ -75,7 +53,6 @@ import world.bentobox.bentobox.nms.PasteHandler;
 import world.bentobox.bentobox.nms.PasteHandlerImpl;
 import world.bentobox.bentobox.nms.WorldRegenerator;
 import world.bentobox.bentobox.nms.WorldRegeneratorImpl;
-
 
 /**
  * A set of utility methods
@@ -170,7 +147,7 @@ public class Util {
     private static final String THE_END = "_the_end";
     private static final String SNAPSHOT = "-SNAPSHOT";
     private static final String SERVER_VERSION = Bukkit.getMinecraftVersion();
-    
+
     private static String serverVersion = null;
     private static BentoBox plugin = BentoBox.getInstance();
     private static PasteHandler pasteHandler = null;
@@ -178,7 +155,114 @@ public class Util {
 
     private static GetMetaData metaData;
 
+    private static final EnumSet<EntityType> HOSTILE_ENTITIES;
+    private static final EnumSet<EntityType> PASSIVE_ENTITIES;
+
     private Util() {}
+
+    static {
+        // Passive
+        PASSIVE_ENTITIES = EnumSet.noneOf(EntityType.class);
+
+        addIfPresent(PASSIVE_ENTITIES, "ALLAY");
+        addIfPresent(PASSIVE_ENTITIES, "ARMADILLO");
+        addIfPresent(PASSIVE_ENTITIES, "AXOLOTL");
+        addIfPresent(PASSIVE_ENTITIES, "BAT");
+        addIfPresent(PASSIVE_ENTITIES, "BEE");
+        addIfPresent(PASSIVE_ENTITIES, "CAMEL");
+        addIfPresent(PASSIVE_ENTITIES, "CAT");
+        addIfPresent(PASSIVE_ENTITIES, "CHICKEN");
+        addIfPresent(PASSIVE_ENTITIES, "COD");
+        addIfPresent(PASSIVE_ENTITIES, "COW");
+        addIfPresent(PASSIVE_ENTITIES, "DOLPHIN");
+        addIfPresent(PASSIVE_ENTITIES, "DONKEY");
+        addIfPresent(PASSIVE_ENTITIES, "FOX");
+        addIfPresent(PASSIVE_ENTITIES, "FROG");
+        addIfPresent(PASSIVE_ENTITIES, "HOGLIN");
+        addIfPresent(PASSIVE_ENTITIES, "GLOW_SQUID");
+        addIfPresent(PASSIVE_ENTITIES, "HORSE");
+        addIfPresent(PASSIVE_ENTITIES, "IRON_GOLEM");
+        addIfPresent(PASSIVE_ENTITIES, "LLAMA");
+        addIfPresent(PASSIVE_ENTITIES, "MULE");
+        addIfPresent(PASSIVE_ENTITIES, "MOOSHROOM");
+        addIfPresent(PASSIVE_ENTITIES, "NAUTILUS");
+        addIfPresent(PASSIVE_ENTITIES, "OCELOT");
+        addIfPresent(PASSIVE_ENTITIES, "PANDA");
+        addIfPresent(PASSIVE_ENTITIES, "PARROT");
+        addIfPresent(PASSIVE_ENTITIES, "PIG");
+        addIfPresent(PASSIVE_ENTITIES, "POLAR_BEAR");
+        addIfPresent(PASSIVE_ENTITIES, "PUFFERFISH");
+        addIfPresent(PASSIVE_ENTITIES, "RABBIT");
+        addIfPresent(PASSIVE_ENTITIES, "SALMON");
+        addIfPresent(PASSIVE_ENTITIES, "SHEEP");
+        addIfPresent(PASSIVE_ENTITIES, "SKELETON_HORSE");
+        addIfPresent(PASSIVE_ENTITIES, "SNIFFER");
+        addIfPresent(PASSIVE_ENTITIES, "SNOW_GOLEM");
+        addIfPresent(PASSIVE_ENTITIES, "SQUID");
+        addIfPresent(PASSIVE_ENTITIES, "STRIDER");
+        addIfPresent(PASSIVE_ENTITIES, "SULFER_CUBE");
+        addIfPresent(PASSIVE_ENTITIES, "TRADER_LLAMA");
+        addIfPresent(PASSIVE_ENTITIES, "TADPOLE");
+        addIfPresent(PASSIVE_ENTITIES, "TROPICAL_FISH");
+        addIfPresent(PASSIVE_ENTITIES, "TURTLE");
+        addIfPresent(PASSIVE_ENTITIES, "VILLAGER");
+        addIfPresent(PASSIVE_ENTITIES, "WOLF");
+        addIfPresent(PASSIVE_ENTITIES, "ZOMBIE_HORSE");
+        addIfPresent(PASSIVE_ENTITIES, "WANDERING_TRADER");
+
+        // Hostile
+        HOSTILE_ENTITIES = EnumSet.noneOf(EntityType.class);
+
+        addIfPresent(HOSTILE_ENTITIES, "BLAZE");
+        addIfPresent(HOSTILE_ENTITIES, "BOGGED");
+        addIfPresent(HOSTILE_ENTITIES, "BREEZE");
+        addIfPresent(HOSTILE_ENTITIES, "CAVE_SPIDER");
+        addIfPresent(HOSTILE_ENTITIES, "CREAKING");
+        addIfPresent(HOSTILE_ENTITIES, "CREEPER");
+        addIfPresent(HOSTILE_ENTITIES, "DROWNED");
+        addIfPresent(HOSTILE_ENTITIES, "ELDER_GUARDIAN");
+        addIfPresent(HOSTILE_ENTITIES, "ENDER_DRAGON");
+        addIfPresent(HOSTILE_ENTITIES, "ENDERMAN");
+        addIfPresent(HOSTILE_ENTITIES, "ENDERMITE");
+        addIfPresent(HOSTILE_ENTITIES, "EVOKER");
+        addIfPresent(HOSTILE_ENTITIES, "GHAST");
+        addIfPresent(HOSTILE_ENTITIES, "GIANT");
+        addIfPresent(HOSTILE_ENTITIES, "GUARDIAN");
+        addIfPresent(HOSTILE_ENTITIES, "HOGLIN");
+        addIfPresent(HOSTILE_ENTITIES, "HUSK");
+        addIfPresent(HOSTILE_ENTITIES, "ILLUSIONER");
+        addIfPresent(HOSTILE_ENTITIES, "MAGMA_CUBE");
+        addIfPresent(HOSTILE_ENTITIES, "PHANTOM");
+        addIfPresent(HOSTILE_ENTITIES, "PIGLIN");
+        addIfPresent(HOSTILE_ENTITIES, "PIGLIN_BRUTE");
+        addIfPresent(HOSTILE_ENTITIES, "PILLAGER");
+        addIfPresent(HOSTILE_ENTITIES, "RAVAGER");
+        addIfPresent(HOSTILE_ENTITIES, "SHULKER");
+        addIfPresent(HOSTILE_ENTITIES, "SILVERFISH");
+        addIfPresent(HOSTILE_ENTITIES, "SKELETON");
+        addIfPresent(HOSTILE_ENTITIES, "SKELETON_HORSE");
+        addIfPresent(HOSTILE_ENTITIES, "SLIME");
+        addIfPresent(HOSTILE_ENTITIES, "SPIDER");
+        addIfPresent(HOSTILE_ENTITIES, "STRAY");
+        addIfPresent(HOSTILE_ENTITIES, "SULFUR_CUBE");
+        addIfPresent(HOSTILE_ENTITIES, "VEX");
+        addIfPresent(HOSTILE_ENTITIES, "VINDICATOR");
+        addIfPresent(HOSTILE_ENTITIES, "WARDEN");
+        addIfPresent(HOSTILE_ENTITIES, "WITCH");
+        addIfPresent(HOSTILE_ENTITIES, "WITHER_SKELETON");
+        addIfPresent(HOSTILE_ENTITIES, "ZOMBIE");
+        addIfPresent(HOSTILE_ENTITIES, "ZOMBIE_VILLAGER");
+        addIfPresent(HOSTILE_ENTITIES, "ZOGLIN");
+        addIfPresent(PASSIVE_ENTITIES, "ZOMBIE_NAUTILUS");
+    }
+
+    private static void addIfPresent(
+            @NonNull EnumSet<@NonNull EntityType> set,
+            @NonNull String name) {
+        try {
+            set.add(EntityType.valueOf(name));
+        } catch (IllegalArgumentException ignored) {}
+    }
 
     /**
      * Used for testing only
@@ -451,6 +535,9 @@ public class Util {
                 && (SULFUR_CUBE == null || entity.getType() != SULFUR_CUBE);
     }
 
+    public static boolean isHostileEntityType(EntityType entityType) {
+        return HOSTILE_ENTITIES.contains(entityType);
+    }
 
     /**
      * Returns whether this entity is naturally passive towards the player or not.
@@ -465,9 +552,9 @@ public class Util {
         }
         // Check built-in class hierarchy for common passive mobs
         boolean isPassiveByClass = entity instanceof Animals
-                || entity instanceof IronGolem 
-                || entity instanceof Snowman 
-                || entity instanceof Bat 
+                || entity instanceof IronGolem
+                || entity instanceof Snowman
+                || entity instanceof Bat
                 || entity instanceof Allay;
 
         // Check WaterMob hierarchy, excluding PufferFish (hostile)
@@ -481,6 +568,10 @@ public class Util {
         boolean isSulfurCube = SULFUR_CUBE != null && entity.getType() == SULFUR_CUBE;
 
         return isPassiveByClass || isPassiveWaterMob || isCopperGolem || isSniffer || isSulfurCube;
+    }
+
+    public static boolean isPassiveEntityType(EntityType entityType) {
+        return PASSIVE_ENTITIES.contains(entityType);
     }
 
     public static boolean isTamableEntity(Entity entity) {
@@ -992,7 +1083,7 @@ public class Util {
      * Simple utility method to check if the server version is at least the target version.
      */
     public static boolean isVersionAtLeast(String targetVersion) {
-        // Simple string comparison may be sufficient for minor versions, 
+        // Simple string comparison may be sufficient for minor versions,
         // but a proper numeric check is safer for major releases.
         try {
             // Get major, minor, patch versions
@@ -1024,7 +1115,7 @@ public class Util {
             .hexColors()
             .useUnusualXRepeatedCharacterHexFormat()
             .build();
-    
+
     /**
      * Converts a string containing Bukkit color codes ('&') into an Adventure Component.
      *

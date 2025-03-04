@@ -10,13 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.junit.jupiter.api.AfterEach;
@@ -53,12 +50,12 @@ class MobSpawnListenerTest extends CommonTestSetup {
 
         SkullMeta skullMeta = mock(SkullMeta.class);
         when(itemFactory.getItemMeta(any())).thenReturn(skullMeta);
- 
+
         when(location.getWorld()).thenReturn(world);
         when(location.getBlockX()).thenReturn(0);
         when(location.getBlockY()).thenReturn(0);
         when(location.getBlockZ()).thenReturn(0);
-        
+
         Mockito.mockStatic(Flags.class);
 
         FlagsManager flagsManager = new FlagsManager(plugin);
@@ -116,7 +113,7 @@ class MobSpawnListenerTest extends CommonTestSetup {
         when(entity.getLocation()).thenReturn(null);
 
         // Setup event
-        CreatureSpawnEvent e = new CreatureSpawnEvent(entity, SpawnReason.NATURAL);
+        PreCreatureSpawnEvent e = new PreCreatureSpawnEvent(location, EntityType.COW, SpawnReason.NATURAL);
 
         // Setup the listener
         MobSpawnListener l = new MobSpawnListener();
@@ -130,6 +127,12 @@ class MobSpawnListenerTest extends CommonTestSetup {
     void testOnNaturalMonsterSpawnBlocked() {
         IslandsManager im = mock(IslandsManager.class);
         when(plugin.getIslands()).thenReturn(im);
+
+        // Worlds
+        when(plugin.getIWM()).thenReturn(iwm);
+        when(iwm.inWorld(any(Location.class))).thenReturn(true);
+        when(iwm.inWorld(any(World.class))).thenReturn(true);
+
         Island island = mock(Island.class);
         when(im.getIslandAt(any())).thenReturn(Optional.of(island));
 
@@ -141,39 +144,34 @@ class MobSpawnListenerTest extends CommonTestSetup {
         l.setPlugin(plugin);
 
         // Check monsters
-        checkBlocked(zombie,l);
-        checkBlocked(slime,l);
+        checkBlocked(EntityType.ZOMBIE, l);
+        checkBlocked(EntityType.SLIME, l);
         // Check animal
-        checkBlocked(cow,l);
-
+        checkBlocked(EntityType.COW, l);
     }
 
-    private void checkBlocked(LivingEntity le, MobSpawnListener l) {
+    private void checkBlocked(EntityType entityType, MobSpawnListener l) {
         for (SpawnReason reason: SpawnReason.values()) {
-            CreatureSpawnEvent e = new CreatureSpawnEvent(le, reason);
+            PreCreatureSpawnEvent e = new PreCreatureSpawnEvent(location, entityType, reason);
             switch (reason) {
                 // Natural
                 case DEFAULT, DROWNED, JOCKEY, LIGHTNING, MOUNT, NATURAL, NETHER_PORTAL, OCELOT_BABY, PATROL, RAID, REINFORCEMENTS, SILVERFISH_BLOCK, TRAP, VILLAGE_DEFENSE, VILLAGE_INVASION -> {
                     // These should be blocked
                     l.onMobSpawn(e);
-                    assertTrue( e.isCancelled(), "Natural spawn should be blocked: " + reason.toString());
+                    assertTrue( e.isCancelled(), "Natural spawn should be blocked: " + reason);
                 }
                 // Spawners
                 case SPAWNER -> {
                     l.onMobSpawn(e);
-                    assertTrue(e.isCancelled(), "Spawners spawn should be blocked: " + reason.toString());
+                    assertTrue(e.isCancelled(), "Spawners spawn should be blocked: " + reason);
                 }
                 // Unnatural - player involved or allowed
                 case BREEDING, BUILD_IRONGOLEM, BUILD_SNOWMAN, BUILD_WITHER, CURED, CUSTOM, DISPENSE_EGG, EGG, ENDER_PEARL, EXPLOSION, INFECTION, SHEARED, SHOULDER_ENTITY, SPAWNER_EGG, SLIME_SPLIT -> {
                     l.onMobSpawn(e);
-                    assertFalse(e.isCancelled(), "Should be not blocked: " + reason.toString());
-                }
-                default -> {
-                    // Other spawn reasons are not tested by this parameterized case; no assertion needed
+                    assertFalse(e.isCancelled(), "Should be not blocked: " + reason);
                 }
             }
         }
-
     }
 
     @Test
@@ -191,16 +189,16 @@ class MobSpawnListenerTest extends CommonTestSetup {
         l.setPlugin(plugin);
 
         // Check monsters
-        checkUnBlocked(zombie,l);
-        checkUnBlocked(slime,l);
+        checkUnBlocked(location, EntityType.ZOMBIE, l);
+        checkUnBlocked(location, EntityType.SLIME, l);
         // Check animal
-        checkUnBlocked(cow,l);
+        checkUnBlocked(location, EntityType.COW, l);
 
     }
 
-    private void checkUnBlocked(LivingEntity le, MobSpawnListener l) {
+    private void checkUnBlocked(Location location, EntityType entityType, MobSpawnListener l) {
         for (SpawnReason reason: SpawnReason.values()) {
-            CreatureSpawnEvent e = new CreatureSpawnEvent(le, reason);
+            PreCreatureSpawnEvent e = new PreCreatureSpawnEvent(location, entityType, reason);
             l.onMobSpawn(e);
             assertFalse(e.isCancelled());
         }
@@ -223,10 +221,10 @@ class MobSpawnListenerTest extends CommonTestSetup {
         l.setPlugin(plugin);
 
         // Check monsters
-        checkBlocked(zombie,l);
-        checkBlocked(slime,l);
+        checkBlocked(EntityType.ZOMBIE, l);
+        checkBlocked(EntityType.SLIME, l);
         // Check animal
-        checkBlocked(cow,l);
+        checkBlocked(EntityType.COW, l);
 
     }
 
@@ -247,10 +245,9 @@ class MobSpawnListenerTest extends CommonTestSetup {
         l.setPlugin(plugin);
 
         // Check monsters
-        checkUnBlocked(zombie,l);
-        checkUnBlocked(slime,l);
+        checkUnBlocked(location, EntityType.ZOMBIE, l);
+        checkUnBlocked(location, EntityType.SLIME, l);
         // Check animal
-        checkUnBlocked(cow,l);
+        checkUnBlocked(location, EntityType.COW, l);
     }
-
 }
